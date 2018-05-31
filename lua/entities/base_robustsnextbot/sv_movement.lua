@@ -135,8 +135,11 @@ function ENT:FollowAltPath( options )
 		end
 		
 		if self.motionless then
-			self:PopActivity()
-			return "stuck"
+			local result = self:GiveMovingSpace( options )
+			if result != "ok" then
+				self:PopActivity()
+				return result
+			end
 		end
 	
 		if options.draw then
@@ -144,8 +147,6 @@ function ENT:FollowAltPath( options )
 				debugoverlay.Line( self.alt_path [i], self.alt_path [i+1], 0.1, color_white, true )
 			end
 		end
-			
-		local offset = vector_origin
 		
 		self.loco:Approach( self.alt_path[self.alt_path_index], 1 )
 		self.loco:FaceTowards( self.alt_path[ self.alt_path_index ] )
@@ -219,8 +220,6 @@ end
 -- how close to the end the NextBot is, and how steep the path is.
 function ENT:UpdateRunOrWalk( len, no_pop )
 	local cur_act = self.activity_stack:Top()
-	
-	print( cur_act[1] )
 	
 	local cursor_dist = self.path:GetCursorPosition()
 	local future_pos = self.path:GetPositionOnPath( cursor_dist + 150 )
