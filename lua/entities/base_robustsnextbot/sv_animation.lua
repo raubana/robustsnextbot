@@ -22,6 +22,13 @@ end
 
 
 
+function ENT:PlayGesture( name )
+	self:AddGestureSequence( self:LookupSequence( name ) )
+end
+
+
+
+
 function ENT:PushActivity( act, duration )
 	print( self, "PushActivity", act, duration )
 	local duration = duration or -1
@@ -29,8 +36,10 @@ function ENT:PushActivity( act, duration )
 	if duration > 0 then
 		endtime = CurTime() + duration
 	end
-
-	self:StartActivity( act )
+	
+	if self.activity_stack:Size() == 0 or act != self.activity_stack:Top()[1] then
+		self:StartActivity( act )
+	end
 	self.activity_stack:Push( {act, endtime} )
 end
 
@@ -41,7 +50,9 @@ function ENT:PopActivity()
 	print( self, "PopActivity" )
 	if self.activity_stack:Size() > 0 then
 		self.activity_stack:Pop()
-		self:StartActivity( self.activity_stack:Top()[1] )
+		if self.activity_stack:Size() == 0 or act != self.activity_stack:Top()[1] then
+			self:StartActivity( self.activity_stack:Top()[1] )
+		end
 	end
 end
 

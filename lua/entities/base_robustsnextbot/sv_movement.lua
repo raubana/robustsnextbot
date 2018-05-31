@@ -67,29 +67,30 @@ function ENT:GiveMovingSpace( options )
 	
 	self:SetupToWalk( true )
 
-	local timeout = CurTime() + ( options.maxage or 3 )
+	local timeout = CurTime() + ( options.maxage or 10 )
 
 	while CurTime() <= timeout do
+		print( "moving..." )
+	
 		local closest_ang = nil
 		local closest_dist = nil
 		local trace_length = 45 -- TODO
-		local start = self:GetPos() + Vector(0,0,75/2) -- TODO
+		local start = self:GetPos() + Vector(0,0,10) -- TODO
 		
 		local offset = (CurTime()%45)*8
 		
-		for ang = 0, 360, 45 do
+		for ang = 0, 360, 30 do
 			local ang2 = ang + offset
 		
 			local normal = Angle(0,ang2,0):Forward()
-			local endpos = start + normal * trace_length
+			local endpos = start + (normal * trace_length)
 			
-			local tr = util.TraceEntity({
+			local tr = util.TraceLine({ -- TODO: TraceEntity wasn't working for some cases??
 					start = start,
 					endpos = endpos,
 					filter = self,
-					mask = MASK_SOLID,
-				},
-				self
+					mask = MASK_SOLID
+				}
 			)
 			
 			if options.draw then
@@ -102,12 +103,11 @@ function ENT:GiveMovingSpace( options )
 			end
 		end
 		
-		if closest_dist == nil or closest_dist > 1 then
+		if closest_dist == nil or closest_dist > 25 then
 			self:PopActivity()
 			return "ok"
 		else
-			local result = Angle( 0, closest_ang, 0 )
-			self.loco:Approach( self:GetPos() - (result:Forward()*100), 1 )
+			self.loco:Approach( self:GetPos() - (Angle( 0, closest_ang, 0 ):Forward()*1000), 1 )
 		end
 		
 		coroutine.yield()
@@ -129,6 +129,8 @@ function ENT:FollowAltPath( options )
 	local timeout = CurTime() + ( options.timeout or 60 )
 	
 	while self.alt_path_index <= #self.alt_path do
+		self:CheckIsMotionless()
+	
 		if CurTime() >= timeout then
 			self:PopActivity()
 			return "timeout"
@@ -150,7 +152,7 @@ function ENT:FollowAltPath( options )
 		
 		self.loco:Approach( self.alt_path[self.alt_path_index], 1 )
 		self.loco:FaceTowards( self.alt_path[ self.alt_path_index ] )
-		if self:GetPos():Distance( self.alt_path[ self.alt_path_index ] ) < 10 then -- TODO: replace magic number
+		if self:GetPos():Distance( self.alt_path[ self.alt_path_index ] ) < 18 then -- TODO: replace magic number
 			self.alt_path_index = self.alt_path_index + 1
 		end
 		
@@ -164,10 +166,18 @@ end
 
 
 
+function ENT:PreHandleStuck( )
+end
+
+
+
+
 function ENT:HandleStuck( options )
 	print( self, "HandleStuck" )
 	
 	self:PushActivity( ACT_IDLE )
+	
+	self:PreHandleStuck()
 
 	-- Give some space around the NextBot. This helps with the next step.
 	local result = self:GiveMovingSpace( options )
@@ -264,7 +274,10 @@ function ENT:MoveToPos( pos, options )
 	self.path:SetGoalTolerance( options.tolerance or 20 )
 	self.path:Compute( self, pos )
 	
-	if not self.path:IsValid() then return "failed" end
+	if not self.path:IsValid() then
+		print( "I FAIL YOU" )
+		return "failed"
+	end
 	
 	-- set the initial animation and speed.
 	local len = self.path:GetLength()

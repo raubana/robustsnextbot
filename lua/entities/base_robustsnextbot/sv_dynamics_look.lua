@@ -124,13 +124,18 @@ function ENT:UpdateLook()
 	end
 	
 	if target_pos == nil then
-		if self.path == nil then
-			target_pos = self:GetHeadPos() + self:GetAngles():Forward() * 1000
-		else
+		if self.alt_path != nil then
+			-- We're following an alt path, so we should be looking at that if
+			-- we're not looking at something else.
+			target_pos = self.alt_path[ math.min( self.alt_path_index+2, #self.alt_path ) ]
+		elseif self.path != nil then
 			-- We're following a path, so we should be looking at that if we're
 			-- not looking at something else.
 			local cursor_dist = self.path:GetCursorPosition()
 			target_pos = self.path:GetPositionOnPath( cursor_dist + 300 )
+		else
+			-- Just look forward blankly
+			target_pos = self:GetHeadPos() + self:GetAngles():Forward() * 1000
 		end
 	end
 	

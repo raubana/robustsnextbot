@@ -31,6 +31,7 @@ end
 function ENT:OnLeaveGround( ent )
 	print( self, "OnLeaveGround" )
 	self:PushActivity( ACT_JUMP )
+	self:SetEntityToLookAt( nil )
 end
 
 
@@ -45,6 +46,22 @@ function ENT:OnLandOnGround( ent )
 		if self:GetVelocity().z < -100 then
 			self:PushActivity( ACT_LAND, 0.5 )
 		end
+	end
+end
+
+
+
+
+function ENT:PreHandleStuck()
+	print( self, "PreHandleStuck" )
+	self:PlayGesture( "G_look_small" )
+end
+
+
+
+function ENT:OnContact( ent )
+	if IsValid( ent ) then
+		self:SetEntityToLookAt( ent )
 	end
 end
 
@@ -66,7 +83,7 @@ function ENT:RunBehaviour()
 			}
 		)
 		
-		local result = self:MoveToPos( pos, {draw=true} )
+		local result = self:MoveToPos( pos, {} )
 		print( "MOVE TO POS RESULT:", result )
 	
 		coroutine.wait( 2 )

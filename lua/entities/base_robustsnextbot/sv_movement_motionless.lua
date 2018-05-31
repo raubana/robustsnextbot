@@ -6,7 +6,7 @@ function ENT:RSNBInitMovementMotionless()
 	self.motionless = false
 	self.motionless_ticks = 0
 	self.motionless_speed_limit = 2 -- How slow the NextBot must be going at most to be considered motionless.
-	self.motionless_interval = 0.5 -- How long before the motionless flag is set to true.
+	self.motionless_interval = 0.33 -- How long before the motionless flag is set to true.
 end
 
 

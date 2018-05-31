@@ -14,11 +14,11 @@ function RSNB_DOA:create( ent, path, minimal_path_dist, options )
 	
 	instance.options = options or {}
 	
-	instance.hull_halfthick = (options.hull_thick or 25) / 2
+	instance.hull_halfthick = (options.hull_thick or 28) / 2
 	instance.hull_stand_height = options.hull_stand_height or 75
 	instance.hull_crouch_height = options.hull_crouch_height or 75
 	
-	instance.node_min_dist = options.node_min_dist or 16
+	instance.node_min_dist = options.node_min_dist or 14
 	instance.node_travel_dist = instance.node_min_dist + 1
 	instance.node_max_dist = instance.node_min_dist*2-1
 	
@@ -57,6 +57,10 @@ end
 
 
 
+local COLOR_RED = Color(255,0,0)
+local COLOR_GREEN = Color(0,255,0)
+
+
 
 local function doValidationHullTrace( start, endpos, mins, maxs, filter, drawit )
 	local tr = util.TraceHull({
@@ -68,12 +72,13 @@ local function doValidationHullTrace( start, endpos, mins, maxs, filter, drawit 
 		mask = MASK_SOLID,
 	})
 	
-	if drawit then
-		local c = COLOR_GREEN
-		if tr.Hit then c = COLOR_RED end
-		
-		debugoverlay.SweptBox( start, endpos, mins, maxs, angle_zero, 1, c )
+	if drawit or true then
+		-- local c = COLOR_GREEN
+		-- if tr.Hit then c = COLOR_RED end
+		-- debugoverlay.SweptBox( start, endpos, mins, maxs, angle_zero, engine.TickInterval()*2, c )
 	end
+	
+	--coroutine.yield() -- FOR DEBUG
 	
 	return tr
 end
@@ -108,6 +113,10 @@ function RSNB_DOA:ScoreNodeWithParent( new_node, parent )
 		data.travel_dist = parent.travel_dist + data.dist_from_parent
 	end
 	
+	if new_node.path_cursor_offset < 0 then 
+		new_node.path_cursor_offset = -math.pow(new_node.path_cursor_offset, 2)
+	end
+	
 	data.score = new_node.dist_from_path + (data.travel_dist*2) - new_node.path_cursor_offset
 	return data
 end
@@ -125,7 +134,7 @@ end
 
 
 function RSNB_DOA:GetNearestNode( pos, ceiling )
-	if #self.nodes == 0 then return nil end
+	if #self.nodes == 0 then return nil, nil end
 
 	local nearest = nil
 	local nearest_dist = nil
@@ -134,10 +143,12 @@ function RSNB_DOA:GetNearestNode( pos, ceiling )
 	local maxs = pos + (ceiling*Vector(1,1,1))
 	
 	for i, node in ipairs(self.nodes) do
-		local dist = node.pos:Distance(pos)
-		if (nearest == nil or dist < nearest_dist) and dist <= ceiling then
-			nearest = node
-			nearest_dist = dist
+		if node.valid then
+			local dist = node.pos:Distance(pos)
+			if (nearest == nil or dist < nearest_dist) and dist <= ceiling then
+				nearest = node
+				nearest_dist = dist
+			end
 		end
 	end
 	
@@ -150,6 +161,8 @@ end
 function RSNB_DOA:CheckSpacialValidityAtPos( pos )
 	local output = {can_stand_here=false}
 	if not util.IsInWorld( pos ) then return output end
+	
+	-- debugoverlay.Box( pos, Vector( -self.hull_halfthick+2, -self.hull_halfthick+2, 2 ), Vector( self.hull_halfthick-2, self.hull_halfthick-2, self.hull_stand_height-2 ), engine.TickInterval()*2 )
 	
 	local height = self.hull_stand_height
 
@@ -204,11 +217,14 @@ function RSNB_DOA:GenerateConnections( node )
 				local existing_connection = self:FindConnection(node, other_node)
 				
 				if existing_connection == nil then
+					-- node:DrawDebug( engine.TickInterval()*2 )
+					-- other_node:DrawDebug( engine.TickInterval()*2 )
+				
 					local tr = doValidationHullTrace(
 						node.pos,
 						other_node.pos,
-						Vector(-self.hull_halfthick+1, -self.hull_halfthick+1, 0),
-						Vector(self.hull_halfthick+1, self.hull_halfthick+1, self.hull_stand_height+1),
+						Vector(-self.hull_halfthick, -self.hull_halfthick, 0),
+						Vector(self.hull_halfthick, self.hull_halfthick, self.hull_stand_height),
 						self.ent
 					)
 					
@@ -244,16 +260,19 @@ function RSNB_DOA:EstimateNewNodesFromGivenNode( node )
 			if not (x==0 and y==0) then
 				local new_pos = node.pos + Vector(x,y,0)
 				
+				--debugoverlay.Cross(node.pos, 3, engine.TickInterval()*2, color_black)
+				--debugoverlay.Cross(new_pos, 3, engine.TickInterval()*2, color_white)
+				
 				local tr = doValidationHullTrace(
-					new_pos + Vector(0,0,16),
-					new_pos - Vector(0,0,self.node_max_dist),
+					new_pos + Vector(0,0,self.node_max_dist-1),
+					new_pos - Vector(0,0,self.node_max_dist-1),
 					Vector(-self.hull_halfthick, -self.hull_halfthick, 0),
 					Vector(self.hull_halfthick, self.hull_halfthick, 0),
 					self.ent
 				)
 				
 				if tr.Hit and not tr.StartSolid then
-					new_pos = tr.HitPos + Vector(0,0,1)
+					new_pos = tr.HitPos + Vector(0,0,5)
 					
 					local other_nearest, other_nearest_dist = self:GetNearestNode( new_pos, self.node_max_dist )
 				
@@ -261,20 +280,35 @@ function RSNB_DOA:EstimateNewNodesFromGivenNode( node )
 						local results = self:CheckSpacialValidityAtPos(new_pos)
 						
 						local new_node = RSNB_DPG_NODE:create( new_pos )
-						table.insert(self.nodes, new_node)
 						
 						if results.can_stand_here then
+							table.insert(self.nodes, new_node)
 							table.insert(self.open_nodes, new_node)
 							
 							self:EvaluateNode(new_node)
 							self:GenerateConnections(new_node)
 						else
+							--debugoverlay.Text(new_pos, "can't stand here", engine.TickInterval()*2)
 							new_node.open = false
 							new_node.valid = false
 						end
+					--else
+					--	if other_nearest == nil then
+					--		debugoverlay.Text(new_pos, "is nil", engine.TickInterval()*2)
+					--	elseif other_nearest_dist < self.node_min_dist then
+					--		debugoverlay.Text(new_pos, "too close", engine.TickInterval()*2)
+					--		debugoverlay.Cross(other_nearest.pos, 10, engine.TickInterval()*2, COLOR_RED)
+					--	else
+					--		debugoverlay.Text(new_pos, "???", engine.TickInterval()*2)
+					--	end
 					end
+				--else
+				--	if not tr.Hit then
+				--		debugoverlay.Text(new_pos, "no hit", engine.TickInterval()*2)
+				--	else
+				--		debugoverlay.Text(new_pos, "start solid", engine.TickInterval()*2)
+				--	end
 				end
-				
 			end
 		end
 	end
@@ -294,7 +328,7 @@ function RSNB_DOA:CreateSeedNode( pos )
 	
 	local pos = pos
 	if tr.Hit then
-		pos = tr.HitPos + Vector(0,0,1)
+		pos = tr.HitPos + Vector(0,0,5)
 	end
 
 	local new_node = RSNB_DPG_NODE:create( pos )
@@ -345,9 +379,8 @@ function RSNB_DOA:Generate()
 	if self.options.draw then
 		self.path:Draw()
 		self:DrawDebug( 0.1 )
+		debugoverlay.Line(pick.pos+Vector(0,0,10), pick.path_cursor_pos+Vector(0,0,10), 0.1, COLOR_WHITE, true)
 	end
-	
-	debugoverlay.Line(pick.pos+Vector(0,0,10), pick.path_cursor_pos+Vector(0,0,10), 0.1, COLOR_WHITE, true)
 	
 	if pick.path_cursor_offset > 0 and pick.dist_from_path < self.node_travel_dist then
 		local new_path = {}
