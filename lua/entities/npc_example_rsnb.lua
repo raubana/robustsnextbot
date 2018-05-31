@@ -10,6 +10,8 @@ function ENT:Initialize()
 	
 	if SERVER then
 		self:RSNBInit()
+		
+		self.use_bodymoveyaw = true
 	end
 end
 
@@ -26,11 +28,48 @@ end
 
 
 
+function ENT:OnLeaveGround( ent )
+	print( self, "OnLeaveGround" )
+	self:PushActivity( ACT_JUMP )
+end
+
+
+
+
+function ENT:OnLandOnGround( ent )
+	print( self, "OnLandOnGround" )
+	if self.activity_stack != nil then
+		if self.activity_stack:Size() > 0 and self.activity_stack:Top()[1] == ACT_JUMP then
+			self:PopActivity()
+		end
+		if self:GetVelocity().z < -100 then
+			self:PushActivity( ACT_LAND, 0.5 )
+		end
+	end
+end
+
+
+
+
 function ENT:RunBehaviour()
 	self:PushActivity( ACT_IDLE )
-	coroutine.wait( 2 )
+	
+	coroutine.wait( 1 )
+	
 	while true do
-		coroutine.wait( 1 )
+		local pos = self:FindSpot(
+			"random",
+			{
+				type = "hiding",
+				pos = self:GetPos(),
+				radius = 100000
+			}
+		)
+		
+		local result = self:MoveToPos( pos, {draw=true} )
+		print( "MOVE TO POS RESULT:", result )
+	
+		coroutine.wait( 2 )
 	end
 end
 
