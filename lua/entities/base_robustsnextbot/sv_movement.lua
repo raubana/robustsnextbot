@@ -170,6 +170,8 @@ function ENT:FollowAltPath( options )
 		coroutine.yield()
 	end
 	
+	self.loco:ClearStuck()
+	
 	self:PopActivity()
 	return "ok"
 end
