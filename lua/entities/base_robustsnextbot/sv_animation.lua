@@ -29,6 +29,19 @@ end
 
 
 
+
+function ENT:PlaySequence( name, speed )
+	local len = self:SetSequence( name )
+
+	self:ResetSequenceInfo()
+	self:SetCycle( 0 )
+	self:SetPlaybackRate( speed or 1 )
+end
+
+
+
+
+
 function ENT:PushActivity( act, duration )
 	print( self, "PushActivity", act, duration )
 	local duration = duration or -1
