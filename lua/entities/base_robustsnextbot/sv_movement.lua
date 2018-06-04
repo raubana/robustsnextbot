@@ -163,7 +163,7 @@ function ENT:FollowAltPath( options )
 		
 		self.loco:Approach( self.alt_path[self.alt_path_index], 1 )
 		self.loco:FaceTowards( self.alt_path[ self.alt_path_index ] )
-		if self:GetPos():Distance( self.alt_path[ self.alt_path_index ] ) < 18 then -- TODO: replace magic number
+		if self:GetPos():Distance( self.alt_path[ self.alt_path_index ] ) < 25 then -- TODO: replace magic number
 			self.alt_path_index = self.alt_path_index + 1
 		end
 		
