@@ -29,6 +29,8 @@ function ENT:RSNBInitMovement()
 	
 	self.run_tolerance = 500
 	
+	self.interrupt = false
+	
 	self:RSNBInitMovementMotionless()
 end
 
@@ -70,7 +72,11 @@ function ENT:GiveMovingSpace( options )
 	local timeout = CurTime() + ( options.maxage or 10 )
 
 	while CurTime() <= timeout do
-		print( "moving..." )
+		
+		if self.interrupt then
+			self:PopActivity()
+			return "interrupt"
+		end
 	
 		local closest_ang = nil
 		local closest_dist = nil
@@ -129,6 +135,11 @@ function ENT:FollowAltPath( options )
 	local timeout = CurTime() + ( options.timeout or 60 )
 	
 	while self.alt_path_index <= #self.alt_path do
+		if self.interrupt then
+			self:PopActivity()
+			return "interrupt"
+		end
+	
 		self:CheckIsMotionless()
 	
 		if CurTime() >= timeout then
@@ -286,6 +297,11 @@ function ENT:MoveToPos( pos, options )
 	self:ResetMotionless()
 	
 	while self.path:IsValid() do
+		if self.interrupt then
+			self:PopActivity()
+			return "interrupt"
+		end
+	
 		self:CheckIsMotionless()
 	
 		local cur_act = self.activity_stack:Top()
