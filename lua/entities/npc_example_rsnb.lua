@@ -29,7 +29,7 @@ end
 
 
 function ENT:OnLeaveGround( ent )
-	print( self, "OnLeaveGround" )
+	-- print( self, "OnLeaveGround" )
 	self:PushActivity( ACT_JUMP )
 	self:SetEntityToLookAt( nil )
 end
@@ -38,7 +38,7 @@ end
 
 
 function ENT:OnLandOnGround( ent )
-	print( self, "OnLandOnGround" )
+	-- print( self, "OnLandOnGround" )
 	if self.activity_stack != nil then
 		if self.activity_stack:Size() > 0 and self.activity_stack:Top()[1] == ACT_JUMP then
 			self:PopActivity()
@@ -53,7 +53,7 @@ end
 
 
 function ENT:PreHandleStuck()
-	print( self, "PreHandleStuck" )
+	-- print( self, "PreHandleStuck" )
 	self:PlayGesture( "G_look_small" )
 end
 

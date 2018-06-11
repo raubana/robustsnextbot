@@ -7,6 +7,10 @@ include( "dpg/rsnb_dpg.lua" )
 
 
 
+local DEBUG_MOVEMENT = CreateConVar("rsnb_debug_movement", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
+
+
+
 
 function ENT:RSNBInitMovement()
 	self.path = nil
@@ -65,7 +69,9 @@ end
 
 
 function ENT:GiveMovingSpace( options )
-	print( self, "GiveMovingSpace" )
+	if DEBUG_MOVEMENT:GetBool() then
+		print( self, "GiveMovingSpace" )
+	end
 	
 	self:SetupToWalk( true )
 
@@ -127,7 +133,10 @@ end
 
 
 function ENT:FollowAltPath( options )
-	print( self, "FollowAltPath" )
+	if DEBUG_MOVEMENT:GetBool() then
+		print( self, "FollowAltPath" )
+	end
+	
 	self:ResetMotionless()
 	
 	self:SetupToWalk( true )
@@ -186,7 +195,9 @@ end
 
 
 function ENT:HandleStuck( options )
-	print( self, "HandleStuck" )
+	if DEBUG_MOVEMENT:GetBool() then
+		print( self, "HandleStuck" )
+	end
 	
 	self:PushActivity( ACT_IDLE )
 	
@@ -278,7 +289,9 @@ end
 
 
 function ENT:MoveToPos( pos, options )
-	print( self, "MoveToPos" )
+	if DEBUG_MOVEMENT:GetBool() then
+		print( self, "MoveToPos" )
+	end
 
 	local options = options or {}
 
@@ -288,7 +301,9 @@ function ENT:MoveToPos( pos, options )
 	self.path:Compute( self, pos )
 	
 	if not self.path:IsValid() then
-		print( "I FAIL YOU" )
+		if DEBUG_MOVEMENT:GetBool() then
+			print( self, "I FAIL YOU." )
+		end
 		return "failed"
 	end
 	

@@ -5,6 +5,10 @@ include( "sv_animation_blink.lua" )
 
 
 
+local DEBUG_ANIMATION = CreateConVar("rsnb_debug_animation", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
+
+
+
 function ENT:RSNBInitAnimation()
 	self.activity_stack = util.Stack()
 	
@@ -23,6 +27,9 @@ end
 
 
 function ENT:PlayGesture( name )
+	if DEBUG_ANIMATION:GetBool() then
+		print( self, "PlayGesture", name )
+	end
 	self:AddGestureSequence( self:LookupSequence( name ) )
 end
 
@@ -31,6 +38,10 @@ end
 
 
 function ENT:PlaySequence( name, speed )
+	if DEBUG_ANIMATION:GetBool() then
+		print( self, "PlayGesture", name, speed )
+	end
+
 	local len = self:SetSequence( name )
 
 	self:ResetSequenceInfo()
@@ -43,7 +54,10 @@ end
 
 
 function ENT:PushActivity( act, duration )
-	print( self, "PushActivity", act, duration )
+	if DEBUG_ANIMATION:GetBool() then
+		print( self, "PushActivity", act, duration )
+	end
+	
 	local duration = duration or -1
 	local endtime = -1
 	if duration > 0 then
@@ -60,7 +74,10 @@ end
 
 
 function ENT:PopActivity()
-	print( self, "PopActivity" )
+	if DEBUG_ANIMATION:GetBool() then
+		print( self, "PopActivity" )
+	end
+	
 	if self.activity_stack:Size() > 0 then
 		self.activity_stack:Pop()
 		if self.activity_stack:Size() == 0 or act != self.activity_stack:Top()[1] then

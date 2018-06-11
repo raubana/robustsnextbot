@@ -1,6 +1,10 @@
 print( "DYNAMICS - LOOK" )
 
 
+
+local DEBUG_DYNAMICS_LOOK = CreateConVar("rsnb_debug_dynamics_look", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
+
+
 -- Should be called last inside of the Initialize method.
 function ENT:RSNBInitDynamicsLook()
 	self.look_head_angle = Angle(0,0,0)
@@ -26,9 +30,19 @@ end
 
 
 
+local COLOR_RED = Color(255,0,0)
+local COLOR_GREEN = Color(0,255,0)
+
+
+
 -- Hook that is called when the entity this NextBot is looking at changes.
 function ENT:OnChangedLookAt( old, new )
-	print( old, new )
+	if DEBUG_DYNAMICS_LOOK:GetBool() then
+		print( self, "OnChangedLookAt", old, new )
+		debugoverlay.Text( self:GetHeadPos(), tostring("changed") )
+		if old != nil then debugoverlay.Line( self:GetHeadPos(), old:GetPos(), 2, COLOR_RED ) end
+		if new != nil then debugoverlay.Line( self:GetHeadPos(), new:GetPos(), 2, COLOR_GREEN ) end
+	end
 end
 
 
