@@ -88,8 +88,8 @@ function ENT:GiveMovingSpace( options )
 		local closest_dist = nil
 		local trace_length = 45 -- TODO
 		local start = self:GetPos() + Vector(0,0,10) -- TODO
-		local mins = Vector(-10,-10,0)
-		local maxs = Vector(10,10,60)
+		local mins = Vector(-2,-2,0)
+		local maxs = Vector(2,2,60)
 		
 		local offset = (CurTime()%45)*8
 		
@@ -119,7 +119,7 @@ function ENT:GiveMovingSpace( options )
 			end
 		end
 		
-		if closest_dist == nil or closest_dist > 25 then
+		if closest_dist == nil or closest_dist > 20 then
 			self:PopActivity()
 			return "ok"
 		else
