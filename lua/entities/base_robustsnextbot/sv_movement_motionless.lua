@@ -1,6 +1,12 @@
 print( "MOVEMENT - MOTIONLESS" )
 
 
+
+local DEBUG_MOTIONLESS = CreateConVar("rsnb_debug_motionless", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
+
+
+
+
 -- Should be called last inside of the Initialize method.
 function ENT:RSNBInitMovementMotionless()
 	self.motionless = false
@@ -13,7 +19,9 @@ end
 
 -- Hook that is called when the NextBot is believed to be motionless.
 function ENT:OnMotionless()
-	print( self, "OnMotionless" )
+	if DEBUG_MOTIONLESS:GetBool() then
+		print( self, "OnMotionless" )
+	end
 end
 
 
@@ -21,7 +29,9 @@ end
 
 -- Hook that is called when the NextBot was motionless but isn't anymore.
 function ENT:OnNoLongerMotionless()
-	print( self, "OnNoLongerMotionless" )
+	if DEBUG_MOTIONLESS:GetBool() then
+		print( self, "OnNoLongerMotionless" )
+	end
 end
 
 

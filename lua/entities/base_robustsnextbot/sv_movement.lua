@@ -88,6 +88,8 @@ function ENT:GiveMovingSpace( options )
 		local closest_dist = nil
 		local trace_length = 45 -- TODO
 		local start = self:GetPos() + Vector(0,0,10) -- TODO
+		local mins = Vector(-10,-10,0)
+		local maxs = Vector(10,10,60)
 		
 		local offset = (CurTime()%45)*8
 		
@@ -97,16 +99,18 @@ function ENT:GiveMovingSpace( options )
 			local normal = Angle(0,ang2,0):Forward()
 			local endpos = start + (normal * trace_length)
 			
-			local tr = util.TraceLine({ -- TODO: TraceEntity wasn't working for some cases??
+			local tr = util.TraceHull({ -- TODO: TraceEntity wasn't working for some cases??
 					start = start,
 					endpos = endpos,
+					mins = mins,
+					maxs = maxs,
 					filter = self,
 					mask = MASK_SOLID
 				}
 			)
 			
-			if options.draw then
-				debugoverlay.Line( start, start + normal * (trace_length * tr.Fraction), 0.1, color_white, true )
+			if DEBUG_MOVEMENT:GetBool() then
+				debugoverlay.SweptBox( start, tr.HitPos, mins, maxs, angle_zero, engine.TickInterval()*2, color_white )
 			end
 			
 			if tr.Hit and (closest_dist == nil or tr.Fraction*trace_length < closest_dist) then
@@ -302,7 +306,7 @@ function ENT:MoveToPos( pos, options )
 	
 	if not self.path:IsValid() then
 		if DEBUG_MOVEMENT:GetBool() then
-			print( self, "I FAIL YOU." )
+			print( self, "I FAIL YOU" )
 		end
 		return "failed"
 	end

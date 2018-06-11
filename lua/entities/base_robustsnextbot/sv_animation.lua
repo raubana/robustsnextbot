@@ -1,11 +1,15 @@
 print( "ANIMATION" )
 
 
+
+
 include( "sv_animation_blink.lua" )
 
 
 
+
 local DEBUG_ANIMATION = CreateConVar("rsnb_debug_animation", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
+
 
 
 
