@@ -8,6 +8,7 @@ include( "dpg/rsnb_dpg.lua" )
 
 
 local DEBUG_MOVEMENT = CreateConVar("rsnb_debug_movement", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
+local DEBUG_MOVEMENT_FORCE_DRAW_PATH = CreateConVar("rsnb_debug_movement_force_draw_path", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
 
 
 
@@ -298,6 +299,10 @@ function ENT:MoveToPos( pos, options )
 	end
 
 	local options = options or {}
+	
+	if DEBUG_MOVEMENT_FORCE_DRAW_PATH:GetBool() then
+		options.draw = true
+	end
 
 	self.path = Path( "Follow" )
 	self.path:SetMinLookAheadDistance( options.lookahead or 300 )
