@@ -322,10 +322,17 @@ function ENT:MoveToPos( pos, options )
 	
 	self:ResetMotionless()
 	
+	local timeout = CurTime() + ( options.maxage or 60 )
+	
 	while self.path:IsValid() do
 		if self.interrupt then
 			self:PopActivity()
 			return "interrupt"
+		end
+		
+		if CurTime() > timeout then
+			self:PopActivity()
+			return "timeout"
 		end
 	
 		self:CheckIsMotionless()
@@ -340,7 +347,7 @@ function ENT:MoveToPos( pos, options )
 		end
 		
 		if cur_act[2] <= 0 and self:OnGround() then
-			local len = self.path:GetLength()
+			local len = self.path:GetLength() - self.path:GetCursorPosition()
 			cur_act = self:UpdateRunOrWalk( len )
 		end
 		
