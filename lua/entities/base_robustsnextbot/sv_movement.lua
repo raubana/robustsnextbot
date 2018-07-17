@@ -7,8 +7,8 @@ include( "dpg/rsnb_dpg.lua" )
 
 
 
-local DEBUG_MOVEMENT = CreateConVar("rsnb_debug_movement", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
-local DEBUG_MOVEMENT_FORCE_DRAW_PATH = CreateConVar("rsnb_debug_movement_force_draw_path", "0", FCVAR_SERVER_CAN_EXECUTE+FCVAR_NOTIFY+FCVAR_CHEAT)
+local DEBUG_MOVEMENT = CreateConVar("rsnb_debug_movement", "0", bit.bor( FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY, FCVAR_CHEAT ) )
+local DEBUG_MOVEMENT_FORCE_DRAW_PATH = CreateConVar("rsnb_debug_movement_force_draw_path", "0", bit.bor( FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY, FCVAR_CHEAT ) )
 
 
 
