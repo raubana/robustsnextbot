@@ -2,7 +2,7 @@ print( "DYNAMICS - LOOK" )
 
 
 
-local DEBUG_DYNAMICS_LOOK = CreateConVar("rsnb_debug_dynamics_look", "0", bit.bor( FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY, FCVAR_CHEAT ) )
+local DEBUG_DYNAMICS_LOOK = CreateConVar("rsnb_debug_dynamics_look", "0", bit.bor( FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY, FCVAR_CHEAT, FCVAR_ARCHIVE ) )
 
 
 -- Should be called last inside of the Initialize method.

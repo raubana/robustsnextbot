@@ -2,7 +2,7 @@ print( "MOVEMENT - MOTIONLESS" )
 
 
 
-local DEBUG_MOTIONLESS = CreateConVar("rsnb_debug_motionless", "0", bit.bor( FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY, FCVAR_CHEAT ) )
+local DEBUG_MOTIONLESS = CreateConVar("rsnb_debug_motionless", "0", bit.bor( FCVAR_SERVER_CAN_EXECUTE, FCVAR_NOTIFY, FCVAR_CHEAT, FCVAR_ARCHIVE ) )
 
 
 
